@@ -19,7 +19,7 @@ input_url = 'train.csv'
 dataFrame = pd.read_csv(input_url, header = 0)
 
 #print dataFrame.shape
-
+############ZZZZZZZZZZIIIIIIIIIIIDDDDDDDDDDDDDDD
 #plt.plot(dataFrame.Age)
 #plt.show()
 
@@ -53,6 +53,7 @@ print type(inputLayer.Fare[10])
 
 
 operated = sigmoid(inputLayer)
+inputLayerArray = operated.as_matrix()
 #print operated
 
 #---------------input Layer created and typecasted and sigmoided---------------#
@@ -60,8 +61,8 @@ operated = sigmoid(inputLayer)
 #-------------- Creating output layer yy ----------#
 
 outputLayer = dataFrame.drop(['PassengerId', 'Name', 'SibSp', 'Parch', 'Embarked', 'Cabin', 'Ticket', 'Age', 'Pclass', 'Sex', 'Fare'], axis = 1)
-
-print outputLayer
+outputLayerArray = outputLayer.as_matrix()
+#print outputLayer
 
 #-----------Output layer created---------------#
 
@@ -69,12 +70,12 @@ print outputLayer
 
 #-------------------------------------Creating all the params needed for forward feed and backprop--------------------#
 
-theta1 = np.random.random((4, 1))
+theta1 = np.random.random((4, 4))
 theta2 = np.random.random((4, 1)) 
 
 #Converting theta1 and theta2 into 1D series
-theta1 = map(lambda x: x[0], theta1)
-theta2 = map(lambda x: x[0], theta2)
+#theta1 = map(lambda x: x[0], theta1)
+#theta2 = map(lambda x: x[0], theta2)
 #print (theta1) 
 #print theta2
 
@@ -85,26 +86,29 @@ theta2_gradient = np.zeros((4, 1))
 theta1_gradient = map(lambda x: x[0], theta1_gradient)
 theta2_gradient = map(lambda x: x[0], theta2_gradient)
 
-#-------------------------------------All the required params for forward feed and backprop created-----------------------------#
+#theta1 = theta1.as_matrix()
 
-for i in range(0, 891):
-	a1 = operated.loc[i]
-	z2 = theta1 * a1
+#-------------------------------------All the required params for forward feed and backprop created-----------------------------#
+a1 = inputLayerArray
+
+for i in range(0, 1):
+	z2 = np.matmul(a1, theta1)
 	#print "load"
-	#print z2
+	#print len(z2)
+	#print len(z2[0])
 	a2 = sigmoid(z2)
 	#print a2
 
-	z3 = theta2 * a2
-	#print z3
+	z3 = np.matmul(a2, theta2)
+	#print len(z3)
+	#print len(z3[0])
 
 	a3 = sigmoid(z3)
 	#print a3
-	print outputLayer.loc[i]
-	del3 = a3 - outputLayer.loc[i] 
-	#print del3
+	del3 = outputLayerArray - a3 
+	print del3
 	#k = raw_input("dede")
-	#del2 = (np.transpose(theta2) * del3)
+	del2 = np.multiply(np.matmul(del3.trasnspose(),theta2), sigmoid(z2) * (1 - sigmoid(z2)) )
 	#print del2
 
 
