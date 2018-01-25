@@ -13,6 +13,8 @@ def sigmoid(ipFrame):
 	retFrame = 1 / (1 + np.exp(ipFrame))
 	return retFrame
 
+def derivative_sigmoid(ipFrame):
+	return sigmoid(ipFrame) * (1 - sigmoid(ipFrame))
 #titanic dataset analyse
 
 input_url = 'train.csv'
@@ -90,8 +92,9 @@ theta2_gradient = map(lambda x: x[0], theta2_gradient)
 
 #-------------------------------------All the required params for forward feed and backprop created-----------------------------#
 a1 = inputLayerArray
+lr = 0.01
 
-for i in range(0, 1):
+for i in range(0, 500):
 	z2 = np.matmul(a1, theta1)
 	#print "load"
 	#print len(z2)
@@ -105,18 +108,39 @@ for i in range(0, 1):
 
 	a3 = sigmoid(z3)
 	#print a3
-	del3 = outputLayerArray - a3 
-	print del3
+	del3 = outputLayerArray - a3
+	#print del3
+
+	sol = derivative_sigmoid(a3)
+	shl = derivative_sigmoid(a2)
+	
 	#k = raw_input("dede")
-	del2 = np.multiply(np.matmul(del3.trasnspose(),theta2), sigmoid(z2) * (1 - sigmoid(z2)) )
-	#print del2
+	del2 = np.multiply(np.matmul(del3,theta2.T), (sigmoid(z2) * (1 - sigmoid(z2))) )
+
+	theta2 += np.matmul(a2.T, del3) * lr
+	theta1 += np.matmul(a1.T, del2) * lr
+	#print len(del2)
+	#print len(del2[0])
+
+print "Printing Theta1 "
+print theta1
+print "Printing Theta2"
+print theta2
 
 
 
-
-
-
-
+#My Intuition
+'''del3 = y-output
+gz3 = derivatives_sigmoid(a3) #sol
+gz2 = derivatives_sigmoid(a2) #shl
+d_output = del3 * gz3
+Error_at_hidden_layer = d_output.dot(Theta2.T)
+d_hiddenlayer = Error_at_hidden_layer * gz3
+Theta2 += a2.T.dot(d_output) *lr
+bout += np.sum(d_output, axis=0,keepdims=True) *lr
+Theta1 += X.T.dot(d_hiddenlayer) *lr
+bh += np.sum(d_hiddenlayer, axis=0,keepdims=True) *lr
+'''
 
 
 
