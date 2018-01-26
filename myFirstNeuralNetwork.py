@@ -92,9 +92,9 @@ theta2_gradient = map(lambda x: x[0], theta2_gradient)
 
 #-------------------------------------All the required params for forward feed and backprop created-----------------------------#
 a1 = inputLayerArray
-lr = 0.01
+lr = 0.3
 
-for i in range(0, 500):
+for i in range(0, 5):
 	z2 = np.matmul(a1, theta1)
 	#print "load"
 	#print len(z2)
@@ -122,12 +122,36 @@ for i in range(0, 500):
 	#print len(del2)
 	#print len(del2[0])
 
-print "Printing Theta1 "
-print theta1
-print "Printing Theta2"
-print theta2
+#print "Printing Theta1 "
+#print theta1
+#print "Printing Theta2"
+#print theta2
+
+#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+
+testDataFrame = pd.read_csv('test.csv', header = 0)
+#print testDataFrame
+testDataFrame = testDataFrame.drop(['PassengerId', 'Name', 'SibSp', 'Parch', 'Embarked', 'Cabin', 'Ticket'], axis = 1)
+testDataFrame.Sex[testDataFrame.Sex == 'male'] = (float)(0)
+testDataFrame.Sex[testDataFrame.Sex == 'female'] = (float)(1)
+
+testDataFrame.Fare = testDataFrame.Fare.fillna(0)
+testDataFrame.Age = testDataFrame.Age.fillna(0)
+
+testDataFrame.Age = inputLayer.Age.astype(float)
+testDataFrame.Sex = inputLayer.Sex.astype(float)
+
+testLayerInput = testDataFrame.as_matrix()
+print testLayerInput
+z2 = np.matmul(testLayerInput, theta1)
+a2 = sigmoid(z2)
+z3 = np.matmul(a2, theta2)
+a3 = sigmoid(z3)
+
+print a3
 
 
+#------------------------------------------------#
 
 #My Intuition
 '''del3 = y-output
