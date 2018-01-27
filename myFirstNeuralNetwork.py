@@ -17,7 +17,7 @@ def derivative_sigmoid(ipFrame):
 	return sigmoid(ipFrame) * (1 - sigmoid(ipFrame))
 #titanic dataset analyse
 
-input_url = 'train.csv'
+input_url = '../input/train.csv'
 dataFrame = pd.read_csv(input_url, header = 0)
 
 #print dataFrame.shape
@@ -46,11 +46,11 @@ inputLayer.Sex = inputLayer.Sex.astype(float)
 
 #------------inputLayer dataframe has 4 i/p units which will be the i/p of neural n/w-----------#
 
-print 'pehla : '
-print type(inputLayer.Age[10])
-print type(inputLayer.Pclass[10])
-print type(inputLayer.Sex[10])
-print type(inputLayer.Fare[10])
+#print 'pehla : '
+#print type(inputLayer.Age[10])
+#print type(inputLayer.Pclass[10])
+#print type(inputLayer.Sex[10])
+#print type(inputLayer.Fare[10])
 
 
 
@@ -59,6 +59,12 @@ inputLayerArray = operated.as_matrix()
 #print operated
 
 #---------------input Layer created and typecasted and sigmoided---------------#
+
+#------------adding bias unit to input layer initially----------#
+
+
+
+
 
 #-------------- Creating output layer yy ----------#
 
@@ -92,9 +98,9 @@ theta2_gradient = map(lambda x: x[0], theta2_gradient)
 
 #-------------------------------------All the required params for forward feed and backprop created-----------------------------#
 a1 = inputLayerArray
-lr = 0.3
+lr = 0.1
 
-for i in range(0, 5):
+for i in range(0, 1000):
 	z2 = np.matmul(a1, theta1)
 	#print "load"
 	#print len(z2)
@@ -115,7 +121,7 @@ for i in range(0, 5):
 	shl = derivative_sigmoid(a2)
 	
 	#k = raw_input("dede")
-	del2 = np.multiply(np.matmul(del3,theta2.T), (sigmoid(z2) * (1 - sigmoid(z2))) )
+	del2 = np.multiply(np.matmul(del3,theta2.T), (sigmoid(a2) * (1 - sigmoid(a2))) )
 
 	theta2 += np.matmul(a2.T, del3) * lr
 	theta1 += np.matmul(a1.T, del2) * lr
@@ -129,8 +135,9 @@ for i in range(0, 5):
 
 #-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
 
-testDataFrame = pd.read_csv('test.csv', header = 0)
+testDataFrame = pd.read_csv('../input/test.csv', header = 0)
 #print testDataFrame
+passId = testDataFrame.PassengerId
 testDataFrame = testDataFrame.drop(['PassengerId', 'Name', 'SibSp', 'Parch', 'Embarked', 'Cabin', 'Ticket'], axis = 1)
 testDataFrame.Sex[testDataFrame.Sex == 'male'] = (float)(0)
 testDataFrame.Sex[testDataFrame.Sex == 'female'] = (float)(1)
@@ -142,14 +149,22 @@ testDataFrame.Age = inputLayer.Age.astype(float)
 testDataFrame.Sex = inputLayer.Sex.astype(float)
 
 testLayerInput = testDataFrame.as_matrix()
-print testLayerInput
+#print testLayerInput
 z2 = np.matmul(testLayerInput, theta1)
-a2 = sigmoid(z2)
+a2 = (z2)
 z3 = np.matmul(a2, theta2)
 a3 = sigmoid(z3)
 
-print a3
 
+
+
+predFrame = pd.DataFrame(data = a3, columns= ['Survived'])
+PassengerIdFrame= pd.DataFrame(data = passId, columns = ['PassengerId'])
+predFrame.Survived = predFrame.Survived.round()
+
+PassengerIdFrame = PassengerIdFrame.assign(Survived = predFrame.Survived)
+
+PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)
 
 #------------------------------------------------#
 
