@@ -10,14 +10,14 @@ warnings.filterwarnings("ignore")
 
 #function to calculate sigmoid of the i/p layer
 def sigmoid(ipFrame):
-	retFrame = 1 / (1 + np.exp(ipFrame))
+	retFrame = (1 / (1 + np.exp(-ipFrame)))
 	return retFrame
 
 def derivative_sigmoid(ipFrame):
-	return sigmoid(ipFrame) * (1 - sigmoid(ipFrame))
+	return (ipFrame) * (1 - (ipFrame))
 #titanic dataset analyse
 
-input_url = '../input/train.csv'
+input_url = 'train.csv'
 dataFrame = pd.read_csv(input_url, header = 0)
 
 #print dataFrame.shape
@@ -39,9 +39,10 @@ inputLayer.Sex[inputLayer.Sex == 'female'] = (float)(1)
 inputLayer.Fare = inputLayer.Fare.fillna(0)
 inputLayer.Age = inputLayer.Age.fillna(0)
 
+
 inputLayer.Age = inputLayer.Age.astype(float)
 inputLayer.Sex = inputLayer.Sex.astype(float)
-
+inputLayer.insert(0,'Bias',1);
 #print inputLayer
 
 #------------inputLayer dataframe has 4 i/p units which will be the i/p of neural n/w-----------#
@@ -78,21 +79,23 @@ outputLayerArray = outputLayer.as_matrix()
 
 #-------------------------------------Creating all the params needed for forward feed and backprop--------------------#
 
-theta1 = np.random.random((4, 4))
-theta2 = np.random.random((4, 1)) 
+theta1 = np.random.random((5, 5))
+theta2 = np.random.random((5, 1)) 
 
+print theta1
+print theta2
 #Converting theta1 and theta2 into 1D series
 #theta1 = map(lambda x: x[0], theta1)
 #theta2 = map(lambda x: x[0], theta2)
 #print (theta1) 
 #print theta2
 
-theta1_gradient = np.zeros((4, 1))
-theta2_gradient = np.zeros((4, 1))
+#theta1_gradient = np.zeros((4, 1))
+#theta2_gradient = np.zeros((4, 1))
 #print type(theta1_gradient)
 #print type(theta2_gradient)
-theta1_gradient = map(lambda x: x[0], theta1_gradient)
-theta2_gradient = map(lambda x: x[0], theta2_gradient)
+#theta1_gradient = map(lambda x: x[0], theta1_gradient)
+#theta2_gradient = map(lambda x: x[0], theta2_gradient)
 
 #theta1 = theta1.as_matrix()
 
@@ -100,31 +103,49 @@ theta2_gradient = map(lambda x: x[0], theta2_gradient)
 a1 = inputLayerArray
 lr = 0.1
 
-for i in range(0, 1000):
-	z2 = np.matmul(a1, theta1)
+for i in range(0, 60000):
+	z2 = inputLayerArray.dot(theta1)
 	#print "load"
 	#print len(z2)
 	#print len(z2[0])
+
+	#-------add bias unit here----#
 	a2 = sigmoid(z2)
 	#print a2
 
-	z3 = np.matmul(a2, theta2)
+	z3 = a2.dot(theta2)
 	#print len(z3)
 	#print len(z3[0])
 
-	a3 = sigmoid(z3)
+	yy = sigmoid(z3)
 	#print a3
-	del3 = outputLayerArray - a3
+	#if i == 500:
+	#	print a3
+	#	print outputLayerArray
+	#	dede = raw_input("do ")
+
+	#error at output layer
+	error = outputLayerArray - yy
 	#print del3
-
-	sol = derivative_sigmoid(a3)
+	sol = derivative_sigmoid(outputLayerArray)
 	shl = derivative_sigmoid(a2)
-	
-	#k = raw_input("dede")
-	del2 = np.multiply(np.matmul(del3,theta2.T), (sigmoid(a2) * (1 - sigmoid(a2))) )
 
-	theta2 += np.matmul(a2.T, del3) * lr
-	theta1 += np.matmul(a1.T, del2) * lr
+	#delta at output layer
+	delta = error * sol 
+
+	#error at hidden layer
+	error_hidden = delta.dot(theta2.T)
+	#delta at hidden layer
+	delta_hidden = error_hidden * shl
+
+	theta2 += a2.T.dot(delta) * lr 
+	theta1 += inputLayerArray.T.dot(delta_hidden) * lr
+
+	#del2 = (np.dot(del3,theta2.T) * (a2 * (1 - a2)))
+
+
+	#theta2 += a2.T.dot(del3) * lr
+	#theta1 += a1.T.dot(del2) * lr
 	#print len(del2)
 	#print len(del2[0])
 
@@ -133,9 +154,16 @@ for i in range(0, 1000):
 #print "Printing Theta2"
 #print theta2
 
-#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+z2 = a1.dot(theta1)
+a2 = sigmoid(z2)
+z3 = a2.dot(theta2)
+a3 = sigmoid(z3)
+#a3 = a3.round()
+print a3
 
-testDataFrame = pd.read_csv('../input/test.csv', header = 0)
+#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+'''
+testDataFrame = pd.read_csv('test.csv', header = 0)
 #print testDataFrame
 passId = testDataFrame.PassengerId
 testDataFrame = testDataFrame.drop(['PassengerId', 'Name', 'SibSp', 'Parch', 'Embarked', 'Cabin', 'Ticket'], axis = 1)
@@ -147,45 +175,29 @@ testDataFrame.Age = testDataFrame.Age.fillna(0)
 
 testDataFrame.Age = inputLayer.Age.astype(float)
 testDataFrame.Sex = inputLayer.Sex.astype(float)
-
+testDataFrame.insert(0,'Bias',1)
 testLayerInput = testDataFrame.as_matrix()
 #print testLayerInput
-z2 = np.matmul(testLayerInput, theta1)
+z2 = np.dot(testLayerInput, theta1)
 a2 = (z2)
-z3 = np.matmul(a2, theta2)
-a3 = sigmoid(z3)
+z3 = np.dot(a2, theta2)
+a3 = (z3)
 
 
 
 
 predFrame = pd.DataFrame(data = a3, columns= ['Survived'])
 PassengerIdFrame= pd.DataFrame(data = passId, columns = ['PassengerId'])
-predFrame.Survived = predFrame.Survived.round()
+#predFrame.Survived = predFrame.Survived.round()
 
 PassengerIdFrame = PassengerIdFrame.assign(Survived = predFrame.Survived)
 
-PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)
+print PassengerIdFrame
+PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)'''
 
 #------------------------------------------------#
 
 #My Intuition
-'''del3 = y-output
-gz3 = derivatives_sigmoid(a3) #sol
-gz2 = derivatives_sigmoid(a2) #shl
-d_output = del3 * gz3
-Error_at_hidden_layer = d_output.dot(Theta2.T)
-d_hiddenlayer = Error_at_hidden_layer * gz3
-Theta2 += a2.T.dot(d_output) *lr
-bout += np.sum(d_output, axis=0,keepdims=True) *lr
-Theta1 += X.T.dot(d_hiddenlayer) *lr
-bh += np.sum(d_hiddenlayer, axis=0,keepdims=True) *lr
-'''
-
-
-
-
-
-
 
 
 
@@ -201,4 +213,4 @@ bh += np.sum(d_hiddenlayer, axis=0,keepdims=True) *lr
 
 
 '''To add - 
-1. Bias units'''	
+1. Bias units - Check'''	
