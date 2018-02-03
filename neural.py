@@ -19,7 +19,7 @@ def derivative_sigmoid(ipFrame):
 	return (ipFrame) * (1 - (ipFrame))
 #titanic dataset analyse
 
-input_url = 'train.csv'
+input_url = '../input/train.csv'
 dataFrame = pd.read_csv(input_url, header = 0)
 
 #print dataFrame.shape
@@ -82,8 +82,8 @@ outputLayerArray = outputLayer.as_matrix()
 
 #-------------------------------------Creating all the params needed for forward feed and backprop--------------------#
 
-theta1 = np.random.uniform(size=(5, 5))
-theta2 = np.random.uniform(size=(5, 1)) 
+#theta1 = np.random.uniform(size=(5, 5))
+#theta2 = np.random.uniform(size=(5, 1)) 
 
 #print theta1
 #print theta2
@@ -114,26 +114,26 @@ bout = np.random.uniform(size = (1,outputLayer_neurons))
 
 #-------------------------------------All the required params for forward feed and backprop created-----------------------------#
 X = inputLayerArray
-lr = 0.03
-
+lr = 0.01
+'''
 #Input array
-#X=np.array([[1,0,1,0],[1,0,1,1],[0,1,0,1]])
+X=np.array([[1,0,1,0],[1,0,1,1],[0,1,0,1]])
 
 #Output
-#y=np.array([[1],[1],[0]])
+y=np.array([[1],[1],[0]])
 
-#inputlayer_neurons = X.shape[1] #number of features in data set
-#hiddenlayer_neurons = 3 #number of hidden layers neurons
-#output_neurons = 1 #number of neurons at output layer
+inputlayer_neurons = X.shape[1] #number of features in data set
+hiddenlayer_neurons = 3 #number of hidden layers neurons
+output_neurons = 1 #number of neurons at output layer
 
 #weight and bias initialization
-'''wh=np.random.uniform(size=(inputlayer_neurons,hiddenlayer_neurons))
+wh=np.random.uniform(size=(inputlayer_neurons,hiddenlayer_neurons))
 bh=np.random.uniform(size=(1,hiddenlayer_neurons))
 wout=np.random.uniform(size=(hiddenlayer_neurons,output_neurons))
-bout=np.random.uniform(size=(1,output_neurons))
-'''
-print wh
-for i in range(0, 90000):
+bout=np.random.uniform(size=(1,output_neurons))'''
+
+#print wh
+for i in range(0, 60000):
 	hli = X.dot(wh) + bh
 	hla = sigmoid(hli)
 
@@ -168,23 +168,24 @@ for i in range(0, 90000):
 #a3 = sigmoid(z3)
 #a3 = a3.round()
 #print a3
-print wh
+#print wh
 
+'''------------------------Testing accuracy---------------------------------------------
 #compare a3 with survived
-'''survived_dataFrame = pd.DataFrame(data = dataFrame.Survived,columns=['Survived'])
+survived_dataFrame = pd.DataFrame(data = dataFrame.Survived,columns=['Survived'])
 calc_dataFrame = pd.DataFrame(data = a3, columns = ['MySurvived'])
 survived_dataFrame = survived_dataFrame.assign(MySurvived = calc_dataFrame.MySurvived)
 survived_dataFrame['match'] = np.where(survived_dataFrame['Survived'] == survived_dataFrame['MySurvived'],1,0)
 correct = survived_dataFrame['match'] == 1
 
-print survived_dataFrame
-print correct
-lol = correct.value_counts()
-print (float)(lol[1].item() / (float)(lol[1].item() + lol[0].item())) * 100
+#print survived_dataFrame
+#print correct
+#lol = correct.value_counts()
+#print (float)(lol[1].item() / (float)(lol[1].item() + lol[0].item())) * 100
 '''
-#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+#-----------No on the basis of this trained wh and wout -----------try to learn for the new dataset-----------#
 
-testDataFrame = pd.read_csv('test.csv', header = 0)
+testDataFrame = pd.read_csv('../input/test.csv', header = 0)
 #print testDataFrame
 passId = testDataFrame.PassengerId
 testDataFrame = testDataFrame.drop(['PassengerId', 'Name', 'SibSp', 'Parch', 'Embarked', 'Cabin', 'Ticket'], axis = 1)
@@ -203,9 +204,7 @@ a2 = sigmoid(z2)
 z3 = a2.dot(wout) + bout
 a3 = sigmoid(z3)
 a3 = a3.round()
-
-
-
+#print a3
 
 predFrame = pd.DataFrame(data = a3, columns= ['Survived'])
 PassengerIdFrame= pd.DataFrame(data = passId, columns = ['PassengerId'])
@@ -218,19 +217,6 @@ PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)
 #------------------------------------------------#
 
 #My Intuition
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 '''To add - 
 1. Bias units - Check'''	
