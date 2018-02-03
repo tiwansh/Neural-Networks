@@ -1,3 +1,5 @@
+#neuralgonecyazy
+
 #my first neural network 
 #Networks Training gone wild
 import warnings
@@ -53,13 +55,13 @@ inputLayer.Sex = inputLayer.Sex.astype(float)
 #print type(inputLayer.Fare[10])
 
 
-
-operated = sigmoid(inputLayer)
+operated = (inputLayer - inputLayer.mean()) / (inputLayer.max() - inputLayer.min())
+operated = sigmoid(operated)
 #operated.insert(0,'Bias',1);
 inputLayerArray = operated.as_matrix()
-print "lolmax"
+#print "lolmax"
 #print inputLayerArray
-print inputLayerArray.shape[1]
+#print inputLayerArray.shape[1]
 #---------------input Layer created and typecasted and sigmoided---------------#
 
 #------------adding bias unit to input layer initially----------#
@@ -100,67 +102,84 @@ theta2 = np.random.uniform(size=(5, 1))
 
 #theta1 = theta1.as_matrix()
 
+inputLayer_neurons = inputLayerArray.shape[1]
+hiddenLayer_neurons = 4 #inputLayerArray.shape[1]
+outputLayer_neurons= 1
+
+wh = np.random.uniform(size=(inputLayer_neurons, hiddenLayer_neurons))
+bh = np.random.uniform(size=(1,hiddenLayer_neurons))
+
+wout = np.random.uniform(size= (inputLayer_neurons,outputLayer_neurons))
+bout = np.random.uniform(size = (1,outputLayer_neurons))
+
 #-------------------------------------All the required params for forward feed and backprop created-----------------------------#
-a1 = inputLayerArray
-lr = 0.1
+X = inputLayerArray
+lr = 0.03
 
-for i in range(0, 60000):
-	z2 = inputLayerArray.dot(theta1)
-	#print "load"
-	#print len(z2)
-	#print len(z2[0])
+#Input array
+#X=np.array([[1,0,1,0],[1,0,1,1],[0,1,0,1]])
 
-	#-------add bias unit here----#
-	a2 = sigmoid(z2)
-	#print a2
+#Output
+#y=np.array([[1],[1],[0]])
 
-	z3 = a2.dot(theta2)
-	#print len(z3)
-	#print len(z3[0])
+#inputlayer_neurons = X.shape[1] #number of features in data set
+#hiddenlayer_neurons = 3 #number of hidden layers neurons
+#output_neurons = 1 #number of neurons at output layer
 
-	yy = sigmoid(z3)
-	#print a3
-	#if i == 500:
-	#	print a3
-	#	print outputLayerArray
-	#	dede = raw_input("do ")
+#weight and bias initialization
+'''wh=np.random.uniform(size=(inputlayer_neurons,hiddenlayer_neurons))
+bh=np.random.uniform(size=(1,hiddenlayer_neurons))
+wout=np.random.uniform(size=(hiddenlayer_neurons,output_neurons))
+bout=np.random.uniform(size=(1,output_neurons))
+'''
 
-	#error at output layer
-	error = outputLayerArray - yy
-	#print del3
-	sol = derivative_sigmoid(outputLayerArray)
-	shl = derivative_sigmoid(a2)
+for i in range(0, 900000):
+	hli = X.dot(wh) + bh
+	hla = sigmoid(hli)
 
-	#delta at output layer
-	delta = error * sol 
+	oli = hla.dot(wout) + bout
+	out = sigmoid(oli)
 
-	#error at hidden layer
-	error_hidden = delta.dot(theta2.T)
-	#delta at hidden layer
-	delta_hidden = error_hidden * shl
+	E = outputLayerArray - out
 
-	theta2 += a2.T.dot(delta) * lr 
-	theta1 += inputLayerArray.T.dot(delta_hidden) * lr
+	sol = derivative_sigmoid(out)
+	shl = derivative_sigmoid(hla)
 
-	#del2 = (np.dot(del3,theta2.T) * (a2 * (1 - a2)))
+	d_out = E * sol
+	
+	E_hl = d_out.dot(wout.T)
+	d_hl = E_hl * sol
+
+	wout += hla.T.dot(d_out) * lr
+	bout += np.sum(d_out, axis = 0, keepdims = True) * lr
+	wh += X.T.dot(d_hl) * lr
+	bh += np.sum(d_hl) * lr
 
 
-	#theta2 += a2.T.dot(del3) * lr
-	#theta1 += a1.T.dot(del2) * lr
-	#print len(del2)
-	#print len(del2[0])
-
+#print out
 #print "Printing Theta1 "
 #print theta1
 #print "Printing Theta2"
 #print theta2
 
-z2 = a1.dot(theta1)
+z2 = X.dot(wh) + bh
 a2 = sigmoid(z2)
-z3 = a2.dot(theta2)
+z3 = a2.dot(wout) + bout
 a3 = sigmoid(z3)
-#a3 = a3.round()
-print a3
+a3 = a3.round()
+#print a3
+
+#compare a3 with survived
+survived_dataFrame = pd.DataFrame(data = dataFrame.Survived,columns=['Survived'])
+calc_dataFrame = pd.DataFrame(data = a3, columns = ['MySurvived'])
+survived_dataFrame = survived_dataFrame.assign(MySurvived = calc_dataFrame.MySurvived)
+survived_dataFrame['match'] = np.where(survived_dataFrame['Survived'] == survived_dataFrame['MySurvived'],1,0)
+correct = survived_dataFrame['match'] == 1
+
+print survived_dataFrame
+print correct
+lol = correct.value_counts()
+print (float)(lol[1].item() / (float)(lol[1].item() + lol[0].item())) * 100
 
 #-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
 '''
@@ -195,7 +214,6 @@ PassengerIdFrame = PassengerIdFrame.assign(Survived = predFrame.Survived)
 
 print PassengerIdFrame
 PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)'''
-
 #------------------------------------------------#
 
 #My Intuition

@@ -132,8 +132,8 @@ bh=np.random.uniform(size=(1,hiddenlayer_neurons))
 wout=np.random.uniform(size=(hiddenlayer_neurons,output_neurons))
 bout=np.random.uniform(size=(1,output_neurons))
 '''
-
-for i in range(0, 900000):
+print wh
+for i in range(0, 90000):
 	hli = X.dot(wh) + bh
 	hla = sigmoid(hli)
 
@@ -162,15 +162,28 @@ for i in range(0, 900000):
 #print "Printing Theta2"
 #print theta2
 
-z2 = X.dot(wh) + bh
-a2 = sigmoid(z2)
-z3 = a2.dot(wout) + bout
-a3 = sigmoid(z3)
-a3 = a3.round()
-print a3
+#z2 = X.dot(wh) + bh
+#a2 = sigmoid(z2)
+#z3 = a2.dot(wout) + bout
+#a3 = sigmoid(z3)
+#a3 = a3.round()
+#print a3
+print wh
 
-#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+#compare a3 with survived
+'''survived_dataFrame = pd.DataFrame(data = dataFrame.Survived,columns=['Survived'])
+calc_dataFrame = pd.DataFrame(data = a3, columns = ['MySurvived'])
+survived_dataFrame = survived_dataFrame.assign(MySurvived = calc_dataFrame.MySurvived)
+survived_dataFrame['match'] = np.where(survived_dataFrame['Survived'] == survived_dataFrame['MySurvived'],1,0)
+correct = survived_dataFrame['match'] == 1
+
+print survived_dataFrame
+print correct
+lol = correct.value_counts()
+print (float)(lol[1].item() / (float)(lol[1].item() + lol[0].item())) * 100
 '''
+#-----------No on the basis of this trained theta1 and theta2-----------try to learn for the new dataset-----------#
+
 testDataFrame = pd.read_csv('test.csv', header = 0)
 #print testDataFrame
 passId = testDataFrame.PassengerId
@@ -183,13 +196,13 @@ testDataFrame.Age = testDataFrame.Age.fillna(0)
 
 testDataFrame.Age = inputLayer.Age.astype(float)
 testDataFrame.Sex = inputLayer.Sex.astype(float)
-testDataFrame.insert(0,'Bias',1)
 testLayerInput = testDataFrame.as_matrix()
 #print testLayerInput
-z2 = np.dot(testLayerInput, theta1)
-a2 = (z2)
-z3 = np.dot(a2, theta2)
-a3 = (z3)
+z2 = testLayerInput.dot(wh) + bh
+a2 = sigmoid(z2)
+z3 = a2.dot(wout) + bout
+a3 = sigmoid(z3)
+a3 = a3.round()
 
 
 
@@ -200,9 +213,8 @@ PassengerIdFrame= pd.DataFrame(data = passId, columns = ['PassengerId'])
 
 PassengerIdFrame = PassengerIdFrame.assign(Survived = predFrame.Survived)
 
-print PassengerIdFrame
-PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)'''
-
+#print PassengerIdFrame
+PassengerIdFrame.to_csv('solution.csv', encoding= 'utf-8', index = False)
 #------------------------------------------------#
 
 #My Intuition
